@@ -1,0 +1,205 @@
+loadstring(game:HttpGet('https://raw.githubusercontent.com/drillygzzly/Roblox-UI-Libs/main/Yun%20V2%20Lib/Yun%20V2%20Lib%20Source.lua'))()
+
+local Library = initLibrary()
+local Window = Library:Load({name = "xan", sizeX = 425, sizeY = 512, color = Color3.fromRGB(255, 255, 255)})
+
+local Tab = Window:Tab("Catching")
+local Tab2 = Window:Tab("Visuals")
+
+local Catching = Tab:Section{name = "Catching", column = 1}
+local HipHeight = Tab:Section{name = "Hip Height", column = 1}
+local FTp = Tab:Section{name = "F To TP", column = 1}
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+
+-- Variables
+local BlatantMS = false
+local TweenMagnet = false
+local catchdist = 25
+local tpDistance = 5
+local toggleStates = {
+    CFrameWalk = false,
+    FtoTP = false
+}
+
+-- Blatant Magnets toggle
+Catching:Toggle {
+    Name = "Blatant Magnets",
+    flag = "ooolol", 
+    callback = function(value)
+        BlatantMS = value
+        print("Blatant Magnets is " .. (BlatantMS and "enabled" or "disabled"))
+
+        if BlatantMS then
+            local char = player.Character or player.CharacterAdded:Wait()
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+
+            if char and hrp then
+                coroutine.wrap(function()
+                    while BlatantMS do
+                        for _, football in workspace:GetChildren() do
+                            if football.Name ~= "Football" or not football:IsA("BasePart") then continue end
+                            local dist = (hrp.Position - football.Position).Magnitude
+                            if dist < catchdist then
+                                local L = char:FindFirstChild("CatchLeft")
+                                local R = char:FindFirstChild("CatchRight")
+                                if L and R then
+                                    local mid = (L.Position + R.Position) / 2
+                                    football.CFrame = CFrame.new(mid)
+                                    football.CanCollide = false
+                                    firetouchinterest(L, football, 0)
+                                    firetouchinterest(R, football, 0)
+                                    task.wait()
+                                    firetouchinterest(L, football, 1)
+                                    firetouchinterest(R, football, 1)
+                                end
+                            end
+                        end
+                        task.wait(0.1)
+                    end
+                end)()
+            end
+        end
+    end
+}
+
+-- Tween Magnets toggle
+Catching:Toggle {
+    Name = "Tween Magnets",
+    flag = "tweenmagnet_toggle", 
+    callback = function(value)
+        TweenMagnet = value
+        print("Tween Magnets is " .. (TweenMagnet and "enabled" or "disabled"))
+
+        if TweenMagnet then
+            local char = player.Character or player.CharacterAdded:Wait()
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+
+            if char and hrp then
+                coroutine.wrap(function()
+                    while TweenMagnet do
+                        for _, football in workspace:GetChildren() do
+                            if football.Name ~= "Football" or not football:IsA("BasePart") then continue end
+                            local dist = (hrp.Position - football.Position).Magnitude
+                            if dist < catchdist then
+                                local L = char:FindFirstChild("CatchLeft")
+                                local R = char:FindFirstChild("CatchRight")
+                                if L and R then
+                                    local mid = (L.Position + R.Position) / 2
+                                    local tween = TweenService:Create(football, TweenInfo.new(0, Enum.EasingStyle.Linear), {CFrame = CFrame.new(mid)})
+                                    football.CanCollide = false
+                                    tween:Play()
+                                end
+                            end
+                        end
+                        task.wait()
+                    end
+                end)()
+            end
+        end
+    end
+}
+
+-- Catch Distance Slider
+Catching:Slider {
+    Name = "Catch Distance",
+    Default = 20,
+    Min = 0,
+    Max = 40,
+    Decimals = 0.5,
+    Flag = "catchdist_slider",
+    callback = function(value)
+        catchdist = value
+        print("Catch distance set to " .. catchdist)
+    end
+}
+
+-- CFrame Walk toggle
+Catching:Toggle {
+    Name = "CFrame Walk",
+    flag = "cfwalk_toggle",
+    callback = function(value)
+        toggleStates.CFrameWalk = value
+        print("CFrame Walk is " .. (value and "enabled" or "disabled"))
+
+        if value then
+            local character = player.Character or player.CharacterAdded:Wait()
+            local hrp = character:WaitForChild("HumanoidRootPart")
+            local humanoid = character:WaitForChild("Humanoid")
+
+            player.CharacterAdded:Connect(function(char)
+                character = char
+                hrp = char:WaitForChild("HumanoidRootPart")
+                humanoid = char:WaitForChild("Humanoid")
+            end)
+
+            coroutine.wrap(function()
+                local distancePerStep = 0.8
+                local interval = 0.08
+
+                while toggleStates.CFrameWalk do
+                    task.wait(interval)
+                    if humanoid and humanoid.MoveDirection.Magnitude > 0 then
+                        local moveDir = humanoid.MoveDirection.Unit * distancePerStep
+                        hrp.CFrame = hrp.CFrame + moveDir
+                    end
+                end
+            end)()
+        end
+    end
+}
+
+-- Hip Height Slider
+HipHeight:Slider {
+    Name = "Hip Height",
+    Default = 0,
+    Min = 0,
+    Max = 10,
+    Decimals = 1,
+    Flag = "hipheight_slider",
+    callback = function(value)
+        local char = game.Players.LocalPlayer.Character
+        if char and char:FindFirstChildOfClass("Humanoid") then
+            char:FindFirstChildOfClass("Humanoid").HipHeight = value
+        end
+    end
+}
+
+-- F to TP Toggle
+Catching:Toggle {
+    Name = "F to Teleport",
+    flag = "ftotp_toggle",
+    callback = function(state)
+        toggleStates.FtoTP = state
+    end
+}
+
+-- F key teleport logic
+UserInputService.InputBegan:Connect(function(input, processed)
+    if processed then return end
+    if input.KeyCode == Enum.KeyCode.F and toggleStates.FtoTP then
+        local char = player.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            local hrp = char.HumanoidRootPart
+            local direction = hrp.CFrame.LookVector
+            hrp.CFrame = hrp.CFrame + direction * tpDistance
+        end
+    end
+end)
+
+-- TP Distance Slider
+FTp:Slider {
+    Name = "TP Distance",
+    Default = 5,
+    Min = 1,
+    Max = 50,
+    Decimals = 1,
+    Flag = "tp_distance_slider",
+    callback = function(val)
+        tpDistance = val
+    end
+}
