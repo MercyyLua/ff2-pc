@@ -68,6 +68,7 @@ Catching:Toggle {
 }
 
 -- Tween Magnets toggle
+-- Tween Magnets toggle
 Catching:Toggle {
     Name = "Tween Magnets",
     flag = "tweenmagnet_toggle", 
@@ -90,13 +91,23 @@ Catching:Toggle {
                                 local R = char:FindFirstChild("CatchRight")
                                 if L and R then
                                     local mid = (L.Position + R.Position) / 2
-                                    local tween = TweenService:Create(football, TweenInfo.new(0, Enum.EasingStyle.Linear), {CFrame = CFrame.new(mid)})
+                                    local tween = TweenService:Create(
+                                        football,
+                                        TweenInfo.new(0.08, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+                                        {CFrame = CFrame.new(mid)}
+                                    )
                                     football.CanCollide = false
                                     tween:Play()
+
+                                    firetouchinterest(L, football, 0)
+                                    firetouchinterest(R, football, 0)
+                                    task.wait()
+                                    firetouchinterest(L, football, 1)
+                                    firetouchinterest(R, football, 1)
                                 end
                             end
                         end
-                        task.wait()
+                        task.wait(0.1)
                     end
                 end)()
             end
