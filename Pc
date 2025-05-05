@@ -121,7 +121,7 @@ Catching:Slider {
     Default = 20,
     Min = 0,
     Max = 40,
-    Decimals = 0.5,
+    Decimals = 1,
     Flag = "catchdist_slider",
     callback = function(value)
         catchdist = value
@@ -181,7 +181,7 @@ HipHeight:Slider {
 }
 
 -- F to TP Toggle
-Catching:Toggle {
+FTp:Toggle {
     Name = "F to Teleport",
     flag = "ftotp_toggle",
     callback = function(state)
@@ -205,9 +205,9 @@ end)
 -- TP Distance Slider
 FTp:Slider {
     Name = "TP Distance",
-    Default = 5,
-    Min = 1,
-    Max = 50,
+    Default = 0,
+    Min = 0,
+    Max = 5,
     Decimals = 1,
     Flag = "tp_distance_slider",
     callback = function(val)
